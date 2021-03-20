@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const gravatar = require('gravatar');
+const bcrypt = require('bcryptjs')
 const { check, validationResult } = require('express-validator');
+
+const User = require('../../models/User');
 
 // @route  POST api/users
 // @Desc Register route
@@ -34,12 +37,21 @@ router.post('/', [
                 d: 'mm'
             })
 
-            user = new User
+            user = new User({
+                name,
+                email,
+                avatar,
+                password
+            });
             // Encrypt password
+            const salt = await bcrypt.genSalt(10);
 
+            user.password = await bcrypt.hash(password, salt);
+            console.log({ user })
+            await user.save();
             // Return jsonwebtoken
 
-            res.send('User route');
+            res.send('User registered');
 
         } catch (err) {
             console.error(err.message);
